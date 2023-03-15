@@ -23,6 +23,9 @@ RECIPE_COLUMNS = ['index',
 
 
 class Recommender:
+    def __init__(self):
+        self.recipes = {}
+
     def get_recipes(self, user_id):
         if self._needs_cold_start(user_id):
             return self._get_cold_start_recipes(user_id)
@@ -34,16 +37,20 @@ class Recommender:
         return True
 
     def _get_cold_start_recipes(self, user_id):
-        query = "select * from recipes;"
+        query = "select * from recipes order by vote_count desc, rating desc limit 100;"
         conn = connect()
-        df = execute_select(conn, query, RECIPE_COLUMNS)
+        data = execute_select(conn, query, RECIPE_COLUMNS)
         # TODO: 1. get the overall most popular (vote count + rating)
         #       2. sort the categories by popularity
         #           2.1 for each category -> get the most popular (vote count + rating)
         #       3. if there are other users in the DB
         #           3.1 do Count Vectorizer for the user metadata to find similar users
         #           3.2 get the other user's top rated recipes
+        #       4. recommend recipes by the time of the day (0800 -> breakfast)
+        self.recipes = {'for_you': data[:13], 'other': data[14:99]}
         conn.close()
+
+        return self.recipes
 
     def _recommend_recipes(self, user_id):
         pass

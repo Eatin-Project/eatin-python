@@ -28,4 +28,4 @@ def execute_select(conn, query, column_names):
         print(error)
     cursor.close()
 
-    return pd.DataFrame(data, columns=column_names)
+    return data
