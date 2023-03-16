@@ -7,10 +7,10 @@ def connect():
     try:
         print('Connecting...')
         conn = psycopg2.connect(
-                        host='10.10.248.108',
-                        database='postgres',
-                        user='eatin',
-                        password='eatin')
+            host='10.10.248.108',
+            database='postgres',
+            user='eatin',
+            password='eatin')
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     print('Connection Successful')
@@ -28,4 +28,4 @@ def execute_select(conn, query, column_names):
         print(error)
     cursor.close()
 
-    return data
+    return pd.DataFrame(data, columns=column_names)
