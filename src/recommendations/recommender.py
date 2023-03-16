@@ -1,4 +1,6 @@
 from src.infra.postgres_connector import connect, execute_select
+import pandas as pd
+import json
 
 RECIPE_COLUMNS = ['index',
                   'recipe_title',
@@ -47,7 +49,10 @@ class Recommender:
         #           3.1 do Count Vectorizer for the user metadata to find similar users
         #           3.2 get the other user's top rated recipes
         #       4. recommend recipes by the time of the day (0800 -> breakfast)
-        self.recipes = {'for_you': data[:13], 'other': data[14:99]}
+        df = pd.DataFrame(data, columns=RECIPE_COLUMNS)
+        recipes_json = json.loads(df.to_json(orient='records'))
+        
+        self.recipes = {'for_you': recipes_json[:13], 'other': recipes_json[14:99]}
         conn.close()
 
         return self.recipes
