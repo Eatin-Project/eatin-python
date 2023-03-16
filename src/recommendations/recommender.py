@@ -1,3 +1,4 @@
+from src.api.models.model import Section
 from src.infra.postgres_connector import connect, execute_select
 import pandas as pd
 import json
@@ -28,7 +29,7 @@ class Recommender:
     def __init__(self):
         self.recipes = {}
 
-    def get_recipes(self, user_id):
+    def get_sections(self, user_id):
         if self._needs_cold_start(user_id):
             return self._get_cold_start_recipes(user_id)
 
@@ -51,9 +52,13 @@ class Recommender:
         #       4. recommend recipes by the time of the day (0800 -> breakfast)
         df = pd.DataFrame(data, columns=RECIPE_COLUMNS)
         recipes_json = json.loads(df.to_json(orient='records'))
-        
-        self.recipes = {'for_you': recipes_json[:13], 'other': recipes_json[14:99]}
+
+        # self.recipes = {'for_you': recipes_json[:13], 'other': recipes_json[14:99]}
+        self.recipes = {{'name': 'for_you', 'recipes': recipes_json[:13]},
+                        {'name': 'other', 'recipes': recipes_json[14:99]}}
         conn.close()
+
+        print(self.recipes)
 
         return self.recipes
 
