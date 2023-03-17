@@ -16,7 +16,8 @@ def default_resolver(root, field):
 
 
 config = StrawberryConfig(
-    default_resolver=default_resolver
+    default_resolver=default_resolver,
+    auto_camel_case=False
 )
 
 
