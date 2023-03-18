@@ -18,7 +18,7 @@ LIMIT 10;"
 TOP_RECIPES_FOR_CATEGORY_QUERY = "select * from recipes \
 where category = '{}' \
 order by (vote_count * rating) desc \
-limit 13;"
+limit 20;"
 
 
 RECIPE_COLUMNS = ['index',
