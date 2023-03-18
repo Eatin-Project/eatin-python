@@ -1,46 +1,9 @@
 import json
 
-from src.infra.postgres_connector import connect, execute_select
-
-MOST_POPULAR_QUERY = "select * from recipes order by vote_count desc, rating desc limit 20;"
-
-TOP_CATEGORIES_QUERY = "SELECT \
-  category, \
-  COUNT(*) AS recipe_count, \
-  SUM(vote_count) AS total_votes, \
-  AVG(rating) AS average_rating, \
-  (0.4 * SUM(vote_count) + 0.4 * AVG(rating) + 0.2 * COUNT(*)) AS popularity_score \
-FROM recipes \
-GROUP BY category \
-ORDER BY popularity_score DESC \
-LIMIT 10;"
-
-TOP_RECIPES_FOR_CATEGORY_QUERY = "select * from recipes \
-where category = '{}' \
-order by (vote_count * rating) desc \
-limit 20;"
-
-
-RECIPE_COLUMNS = ['index',
-                  'recipe_title',
-                  'url',
-                  'record_health',
-                  'vote_count',
-                  'rating',
-                  'description',
-                  'cuisine',
-                  'course',
-                  'diet',
-                  'prep_time',
-                  'cook_time',
-                  'ingredients',
-                  'instructions',
-                  'author',
-                  'tags',
-                  'category',
-                  'image',
-                  'difficulty',
-                  'total_time']
+from src.infra.postgres_connector import connect, execute_select, get_df_from
+from src.recommendations.consts import MOST_POPULAR_QUERY, RECIPE_COLUMNS, TOP_CATEGORIES_QUERY, TOP_CATEGORIES_COLUMNS, \
+    TOP_RECIPES_FOR_CATEGORY_QUERY, COUNT_USER_RATINGS_QUERY, COLD_START_RATING_AMOUNT
+from src.recommendations.models.tf_idf import generate_tf_idf_recommendations
 
 
 def get_recipes_sections(user_id):
@@ -51,8 +14,9 @@ def get_recipes_sections(user_id):
 
 
 def _needs_cold_start(user_id):
-    # TODO: write cold start entering logic (e.g. if the user has less than X ratings)
-    return True
+    df = get_df_from(COUNT_USER_RATINGS_QUERY.format(user_id), ['count'])
+
+    return df[df['count'] >= COLD_START_RATING_AMOUNT].empty
 
     # TODO: 1. get the overall most popular (vote count + rating)
     #       2. sort the categories by popularity
@@ -67,8 +31,8 @@ def _get_cold_start_recipes(user_id):
     conn = connect()
     most_popular_df = execute_select(conn, MOST_POPULAR_QUERY, RECIPE_COLUMNS)
     top_categories_df = execute_select(conn, TOP_CATEGORIES_QUERY,
-                                       ['category', 'recipe_count', 'total_votes', 'average_rating', 'popularity_score'])
-    category_sections = [create_sections_of(category, conn) for category in top_categories_df['category']]
+                                       TOP_CATEGORIES_COLUMNS)
+    category_sections = [_create_sections_of(category, conn) for category in top_categories_df['category']]
     recipes_json = json.loads(most_popular_df.to_json(orient='records'))
     popular_section = [{'name': 'Popular On Eatin', 'recipes': recipes_json}]
     conn.close()
@@ -76,12 +40,11 @@ def _get_cold_start_recipes(user_id):
     return popular_section + category_sections
 
 
-def create_sections_of(category, conn):
+def _create_sections_of(category, conn):
     df = execute_select(conn, TOP_RECIPES_FOR_CATEGORY_QUERY.format(category), RECIPE_COLUMNS)
     recipes_json = json.loads(df.to_json(orient='records'))
-    section = {'name': category, 'recipes': recipes_json}
-    return section
+    return {'name': category, 'recipes': recipes_json}
 
 
 def _recommend_recipes(user_id):
-    print('kaki')
+    return generate_tf_idf_recommendations(user_id)
