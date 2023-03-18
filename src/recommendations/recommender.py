@@ -2,7 +2,7 @@ import json
 
 from src.infra.postgres_connector import connect, execute_select
 
-MOST_POPULAR_QUERY = "select * from recipes order by vote_count desc, rating desc limit 100;"
+MOST_POPULAR_QUERY = "select * from recipes order by vote_count desc, rating desc limit 20;"
 
 TOP_CATEGORIES_QUERY = "SELECT \
   category, \
