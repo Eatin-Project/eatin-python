@@ -50,15 +50,15 @@ def generate_tf_idf_recommendations(user_id):
     user_liked_recipes_df = get_df_from(GET_USER_TOP_RATED_RECIPES_QUERY.format(user_id, RECIPE_AMOUNT),
                                         ['recipe_title'])
 
-    return [_build_section(recipe_title, all_recipes, cosine_similarity_matrix) for recipe_title in
-            user_liked_recipes_df['recipe_title']]
+    return [_build_section(recipe_title, all_recipes, cosine_similarity_matrix, index + 1) for index, recipe_title in
+            enumerate(user_liked_recipes_df['recipe_title'])]
 
 
-def _build_section(recipe_title, all_recipes, cosine_similarity_matrix):
+def _build_section(recipe_title, all_recipes, cosine_similarity_matrix, rank):
     df = recommendations(recipe_title, all_recipes, cosine_similarity_matrix, 12)
     recipes_json = json.loads(df.to_json(orient='records'))
 
-    return {'name': 'Because You Liked {}'.format(recipe_title), 'recipes': recipes_json}
+    return {'name': 'Because You Liked {}'.format(recipe_title), 'recipes': recipes_json, 'rank': rank}
 
 
 def _calc_model(all_recipes):
