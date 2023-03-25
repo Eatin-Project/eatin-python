@@ -19,12 +19,12 @@ TOP_CATEGORIES_QUERY = "SELECT \
   COUNT(*) AS recipe_count, \
   SUM(vote_count) AS total_votes, \
   AVG(rating) AS average_rating, \
-  {} AS popularity_score, \
-  ROW_NUMBER () OVER (ORDER BY {} desc) as row_num \
+  {0} AS popularity_score, \
+  ROW_NUMBER () OVER (ORDER BY {0} desc) as row_num \
 FROM recipes \
 GROUP BY category \
 ORDER BY popularity_score DESC \
-LIMIT 10;".format(POPULARITY, POPULARITY)
+LIMIT 10;".format(POPULARITY)
 
 
 TOP_RECIPES_FOR_CATEGORY_QUERY = "select * from recipes \
