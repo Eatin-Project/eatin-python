@@ -40,7 +40,7 @@ def _get_cold_start_recipes(user_id):
     most_popular_df = execute_select(conn, MOST_POPULAR_QUERY, RECIPE_COLUMNS)
     top_categories_df = execute_select(conn, TOP_CATEGORIES_QUERY,
                                        TOP_CATEGORIES_COLUMNS)
-    category_sections = [_create_sections_of(category.category, _get_rank(top_categories_df.__len__(), category.row_num)
+    category_sections = [_create_sections_of(category.category, _get_rank(len(top_categories_df), category.row_num)
                                              , conn) for category in top_categories_df.itertuples()]
     recipes_json = json.loads(most_popular_df.to_json(orient='records'))
     popular_section = [{'name': 'Popular On Eatin', 'recipes': recipes_json, 'rank': 0}]
