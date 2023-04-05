@@ -8,11 +8,13 @@ from src.recommendations.models.tf_idf import generate_tf_idf_recommendations
 
 
 def get_recipes_sections(user_id):
-    if _needs_cold_start(user_id):
-        return _get_cold_start_recipes(user_id)
+    conn = connect()
+    if _needs_cold_start(user_id, conn):
+        return _get_cold_start_recipes(user_id, conn)
 
-    recipes = _recommend_recipes(user_id) + _get_cold_start_recipes(user_id)
+    recipes = _recommend_recipes(user_id, conn) + _get_cold_start_recipes(user_id, conn)
     recipes.sort(key=get_rank)
+    conn.close()
 
     return recipes
 
@@ -21,8 +23,8 @@ def get_rank(element):
     return element['rank']
 
 
-def _needs_cold_start(user_id):
-    df = get_df_from(COUNT_USER_RATINGS_QUERY.format(user_id), ['count'])
+def _needs_cold_start(user_id, conn):
+    df = get_df_from(COUNT_USER_RATINGS_QUERY.format(user_id), ['count'], conn)
 
     return df[df['count'] >= COLD_START_RATING_AMOUNT].empty
 
@@ -35,16 +37,15 @@ def _needs_cold_start(user_id):
     #       4. recommend recipes by the time of the day (0800 -> breakfast)
 
 
-def _get_cold_start_recipes(user_id):
-    conn = connect()
+def _get_cold_start_recipes(user_id, conn):
     most_popular_df = execute_select(conn, MOST_POPULAR_QUERY, RECIPE_COLUMNS)
     top_categories_df = execute_select(conn, TOP_CATEGORIES_QUERY,
                                        TOP_CATEGORIES_COLUMNS)
+    # TODO: this takes 0.5 seconds. optional: save this in a parquet file when saving the model
     category_sections = [_create_sections_of(category.category, _get_rank(len(top_categories_df), category.row_num)
                                              , conn) for category in top_categories_df.itertuples()]
     recipes_json = json.loads(most_popular_df.to_json(orient='records'))
     popular_section = [{'name': 'Popular On Eatin', 'recipes': recipes_json, 'rank': 0}]
-    conn.close()
 
     return popular_section + category_sections
 
@@ -60,5 +61,5 @@ def _create_sections_of(category, rank, conn):
     return {'name': category, 'recipes': recipes_json, 'rank': int(rank)}
 
 
-def _recommend_recipes(user_id):
-    return generate_tf_idf_recommendations(user_id)
+def _recommend_recipes(user_id, conn):
+    return generate_tf_idf_recommendations(user_id, conn)
