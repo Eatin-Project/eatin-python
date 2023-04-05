@@ -4,7 +4,7 @@ import typing
 import strawberry
 from strawberry.schema.config import StrawberryConfig
 
-from src.api.models.model import Section
+from src.api.models.recipe import Section
 from src.recommendations.recommender import get_recipes_sections
 
 
@@ -22,7 +22,6 @@ config = StrawberryConfig(
 
 
 def sections_resolver(user_id: str) -> typing.List[Section]:
-    print(user_id)
     return get_recipes_sections(user_id)
 
 

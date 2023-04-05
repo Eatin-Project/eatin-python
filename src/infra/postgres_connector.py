@@ -31,9 +31,5 @@ def execute_select(conn, query, column_names):
     return pd.DataFrame(data, columns=column_names)
 
 
-def get_df_from(query, columns):
-    conn = connect()
-    df = execute_select(conn, query, columns)
-    conn.close()
-
-    return df
+def get_df_from(query, columns, conn):
+    return execute_select(conn, query, columns)
