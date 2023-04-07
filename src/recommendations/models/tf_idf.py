@@ -1,4 +1,5 @@
 import json
+import os
 
 import joblib
 import pandas as pd
@@ -9,8 +10,8 @@ from src.infra.postgres_connector import get_df_from
 from src.recommendations.consts import GET_USER_TOP_RATED_RECIPES_QUERY, \
     RECIPE_AMOUNT
 
-TF_IDF_FILE_LOCATION = 'models/tf_idf.joblib'
-RECIPES_PARQUET_LOCATION = 'dataset/recipes.parquet.gzip'
+TF_IDF_FILE_LOCATION = os.path.join('models', 'tf_idf.joblib')
+RECIPES_PARQUET_LOCATION = os.path.join('dataset', 'recipes.parquet.gzip')
 
 
 # TODO: This model receives a recipe title (I think I can change it to recipe index),
