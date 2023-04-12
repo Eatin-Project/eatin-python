@@ -1,3 +1,6 @@
+import os
+from sys import platform
+
 from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
@@ -24,6 +27,10 @@ async def add_cache_control_header(request: Request, call_next):
 # TODO: remove this when we deploy on a server
 @app.on_event("startup")
 async def startup_event():
+    if platform == "win32":
+        os.chdir('../')
+
     calc_model()
+
 
 app.include_router(graphql_app, prefix="/graphql")
