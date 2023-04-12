@@ -1,17 +1,12 @@
 import json
-import os
 
 import joblib
-import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from src.infra.postgres_connector import get_df_from
 from src.recommendations.consts import GET_USER_TOP_RATED_RECIPES_QUERY, \
-    RECIPE_AMOUNT
-
-TF_IDF_FILE_LOCATION = os.path.join('models', 'tf_idf.joblib')
-RECIPES_PARQUET_LOCATION = os.path.join('dataset', 'recipes.parquet.gzip')
+    RECIPE_AMOUNT, TF_IDF_FILE_LOCATION
 
 
 # TODO: This model receives a recipe title (I think I can change it to recipe index),
@@ -21,9 +16,7 @@ RECIPES_PARQUET_LOCATION = os.path.join('dataset', 'recipes.parquet.gzip')
 #       2. get the top X recipes with the highest rating
 #       3. run the model on each recipe
 #       4. combine the results and drop duplicates
-def generate_tf_idf_recommendations(user_id, conn):
-    all_recipes = _get_recipes()
-
+def generate_tf_idf_recommendations(user_id, conn, all_recipes):
     cosine_similarity_matrix = _load_model()
     user_liked_recipes_df = get_df_from(GET_USER_TOP_RATED_RECIPES_QUERY.format(user_id, RECIPE_AMOUNT),
                                         ['recipe_title'], conn)
@@ -32,9 +25,8 @@ def generate_tf_idf_recommendations(user_id, conn):
             enumerate(user_liked_recipes_df['recipe_title'])]
 
 
-def calc_model():
+def calc_tf_idf_model(all_recipes):
     print('calculating tf-idf')
-    all_recipes = _get_recipes()
     df = all_recipes[all_recipes['description'].notna()]
     df['description'] = df.apply(lambda x: _process_text(x.description), axis=1)
 
@@ -44,15 +36,6 @@ def calc_model():
 
     joblib.dump(cosine_similarity_matrix, TF_IDF_FILE_LOCATION)
     print('finished calculating tf-idf')
-
-
-def _get_recipes():
-    all_recipes = pd.read_parquet(RECIPES_PARQUET_LOCATION).reset_index()
-    all_recipes['ingredients'] = [json.dumps(ingredient.tolist()) for ingredient in all_recipes['ingredients']]
-    all_recipes['instructions'] = [json.dumps(instruction.tolist()) for instruction in all_recipes['instructions']]
-    all_recipes['tags'] = [json.dumps(tag.tolist()) for tag in all_recipes['tags']]
-
-    return all_recipes
 
 
 def _load_model():

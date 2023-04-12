@@ -1,9 +1,15 @@
+import json
+import os
+
+import pandas as pd
+
 RECIPE_AMOUNT = 3
 COLD_START_RATING_AMOUNT = 3
 
 COUNT_USER_RATINGS_QUERY = "select count(*) from ratings where user_id = '{}'"
 ALL_RECIPES_QUERY = "select * from recipes"
-USER_RATINGS_COLUMNS = ['user_id', 'recipe_id', 'rating']
+ALL_RATINGS_QUERY = "select * from ratings;"
+USER_RATINGS_COLUMNS = ['user_id', 'recipe_index', 'rating']
 GET_USER_TOP_RATED_RECIPES_QUERY = "select recipes.recipe_title from ratings, recipes \
                                         where ratings.user_id = '{}' \
                                         and ratings.recipe_index = recipes.index \
@@ -54,3 +60,17 @@ RECIPE_COLUMNS = ['index',
                   'image',
                   'difficulty',
                   'total_time']
+
+
+TF_IDF_FILE_LOCATION = os.path.join('models', 'tf_idf.joblib')
+RECIPES_PARQUET_LOCATION = os.path.join('dataset', 'recipes.parquet.gzip')
+SVD_FILE_LOCATION = os.path.join('models', 'svd.joblib')
+RATINGS_PARQUET_LOCATION = os.path.join('dataset', 'ratings.parquet.gzip')
+
+def get_recipes():
+    all_recipes = pd.read_parquet(RECIPES_PARQUET_LOCATION).reset_index()
+    all_recipes['ingredients'] = [json.dumps(ingredient.tolist()) for ingredient in all_recipes['ingredients']]
+    all_recipes['instructions'] = [json.dumps(instruction.tolist()) for instruction in all_recipes['instructions']]
+    all_recipes['tags'] = [json.dumps(tag.tolist()) for tag in all_recipes['tags']]
+
+    return all_recipes
