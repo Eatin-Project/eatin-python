@@ -3,7 +3,8 @@ import math
 
 from src.infra.postgres_connector import connect, execute_select, get_df_from
 from src.recommendations.consts import MOST_POPULAR_QUERY, RECIPE_COLUMNS, TOP_CATEGORIES_QUERY, TOP_CATEGORIES_COLUMNS, \
-    TOP_RECIPES_FOR_CATEGORY_QUERY, COUNT_USER_RATINGS_QUERY, COLD_START_RATING_AMOUNT
+    TOP_RECIPES_FOR_CATEGORY_QUERY, COUNT_USER_RATINGS_QUERY, COLD_START_RATING_AMOUNT, get_recipes
+from src.recommendations.models.svd import generate_svd_recommendations
 from src.recommendations.models.tf_idf import generate_tf_idf_recommendations
 
 
@@ -12,7 +13,7 @@ def get_recipes_sections(user_id):
     if _needs_cold_start(user_id, conn):
         return _get_cold_start_recipes(user_id, conn)
 
-    recipes = _recommend_recipes(user_id, conn) + _get_cold_start_recipes(user_id, conn)
+    recipes = _recommend_recipes(user_id, conn, get_recipes()) + _get_cold_start_recipes(user_id, conn)
     recipes.sort(key=get_rank)
     conn.close()
 
@@ -61,5 +62,6 @@ def _create_sections_of(category, rank, conn):
     return {'name': category, 'recipes': recipes_json, 'rank': int(rank)}
 
 
-def _recommend_recipes(user_id, conn):
-    return generate_tf_idf_recommendations(user_id, conn)
+def _recommend_recipes(user_id, conn, all_recipes):
+    return generate_tf_idf_recommendations(user_id, conn, all_recipes) + generate_svd_recommendations(user_id, conn,
+                                                                                                      all_recipes)
