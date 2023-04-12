@@ -68,6 +68,7 @@ RECIPES_PARQUET_LOCATION = os.path.join('dataset', 'recipes.parquet.gzip')
 SVD_FILE_LOCATION = os.path.join('models', 'svd.joblib')
 RATINGS_PARQUET_LOCATION = os.path.join('dataset', 'ratings.parquet.gzip')
 
+
 def get_recipes():
     all_recipes = pd.read_parquet(RECIPES_PARQUET_LOCATION).reset_index()
     all_recipes['ingredients'] = [json.dumps(ingredient.tolist()) for ingredient in all_recipes['ingredients']]

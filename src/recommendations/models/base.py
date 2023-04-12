@@ -12,4 +12,4 @@ def _index_from_title(df, title):
 
 
 def title_from_index(df, index):
-    return df[df.index == index].recipe_title.values[0]
+    return df[df['index'] == index].recipe_title.values[0]
