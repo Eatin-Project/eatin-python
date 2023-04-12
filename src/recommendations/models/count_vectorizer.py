@@ -7,15 +7,16 @@ from sklearn.metrics.pairwise import cosine_similarity
 from src.recommendations.consts import COUNT_VECTORIZER_FILE_LOCATION
 from src.recommendations.models.base import recommendations, title_from_index
 
+w_ingredients = 10
 w_record_health = 2
 w_course = 1
 w_cuisine = 10
 w_diet = 3
 w_prep_time = 7
 w_cook_time = 7
-w_category = 7
+w_category = 13
 w_difficulty = 4
-w_tags = 5
+w_tags = 15
 
 
 def concatenate_features(df_row):
@@ -23,6 +24,7 @@ def concatenate_features(df_row):
         ' '.join([df_row['cuisine']] * w_cuisine) + ' ' + \
         ' '.join([df_row['course']] * w_course) + ' ' + \
         ' '.join([df_row['diet']] * w_diet) + ' ' + \
+        ' '.join([df_row['ingredients']] * w_ingredients) + ' ' + \
         ' '.join(str([df_row['prep_time']]) * w_prep_time) + ' ' + \
         ' '.join(str([df_row['cook_time']]) * w_cook_time) + ' ' + \
         ' '.join([df_row['category']] * w_category) + ' ' + \
@@ -53,15 +55,14 @@ def convert_values(df):
     df['course'] = df.apply(lambda x: return_values(x.course), axis=1)
     df['diet'] = df.apply(lambda x: return_values(x.diet), axis=1)
     df['category'] = df.apply(lambda x: return_values(x.category), axis=1)
-    df['difficulty'] = df.apply(lambda x: return_values(x.category), axis=1)
+    df['difficulty'] = df.apply(lambda x: return_values(x.difficulty), axis=1)
     df['tags'] = df.apply(lambda x: return_list_values(x.tags), axis=1)
+    df['ingredients'] = df.apply(lambda x: return_list_values(x.ingredients), axis=1)
 
 
 def process_text(text):
-    # replace multiple spaces with one
     text = ' '.join(text.split())
-    # lowercase
-    text=text.lower()
+    text = text.lower()
 
     return text
 
@@ -92,4 +93,3 @@ def generate_count_vectorizer_recommendations(recipe_index, all_recipes):
     recipes_json = json.loads(df.to_json(orient='records'))
 
     return [{'name': 'Similar Recipes', 'recipes': recipes_json, 'rank': 0}]
-
