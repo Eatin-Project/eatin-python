@@ -63,6 +63,7 @@ RECIPE_COLUMNS = ['index',
 
 
 TF_IDF_FILE_LOCATION = os.path.join('models', 'tf_idf.joblib')
+COUNT_VECTORIZER_FILE_LOCATION = os.path.join('models', 'count-vectorizer.joblib')
 RECIPES_PARQUET_LOCATION = os.path.join('dataset', 'recipes.parquet.gzip')
 SVD_FILE_LOCATION = os.path.join('models', 'svd.joblib')
 RATINGS_PARQUET_LOCATION = os.path.join('dataset', 'ratings.parquet.gzip')

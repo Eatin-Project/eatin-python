@@ -4,8 +4,13 @@ import math
 from src.infra.postgres_connector import connect, execute_select, get_df_from
 from src.recommendations.consts import MOST_POPULAR_QUERY, RECIPE_COLUMNS, TOP_CATEGORIES_QUERY, TOP_CATEGORIES_COLUMNS, \
     TOP_RECIPES_FOR_CATEGORY_QUERY, COUNT_USER_RATINGS_QUERY, COLD_START_RATING_AMOUNT, get_recipes
+from src.recommendations.models.count_vectorizer import generate_count_vectorizer_recommendations
 from src.recommendations.models.svd import generate_svd_recommendations
 from src.recommendations.models.tf_idf import generate_tf_idf_recommendations
+
+
+def get_similar_recipes(recipe_index):
+   return generate_count_vectorizer_recommendations(recipe_index, get_recipes())
 
 
 def get_recipes_sections(user_id):
