@@ -1,5 +1,5 @@
-def recommendations(recipe_title, df, cosine_similarity_matrix, number_of_recommendations):
-    index = _index_from_title(df, recipe_title)
+def recommendations(df, cosine_similarity_matrix, number_of_recommendations, recipe_title=None, recipe_index=None):
+    index = recipe_index if recipe_index is not None else _index_from_title(df, recipe_title)
     similarity_scores = list(enumerate(cosine_similarity_matrix[index]))
     similarity_scores_sorted = sorted(similarity_scores, key=lambda x: x[1], reverse=True)
     recommendations_indices = [t[0] for t in similarity_scores_sorted[1:(number_of_recommendations + 1)]]

@@ -51,7 +51,7 @@ def _process_text(text):
 
 
 def _build_section(recipe_title, all_recipes, cosine_similarity_matrix, rank):
-    df = recommendations(recipe_title, all_recipes, cosine_similarity_matrix, 12)
+    df = recommendations(all_recipes, cosine_similarity_matrix, 20, recipe_title)
     recipes_json = json.loads(df.to_json(orient='records'))
 
     return {'name': 'Because You Liked {}'.format(recipe_title), 'recipes': recipes_json, 'rank': rank}
