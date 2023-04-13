@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from src.recommendations.consts import COUNT_VECTORIZER_FILE_LOCATION
-from src.recommendations.models.base import recommendations
+from src.recommendations.models.content_based import recommendations
 
 w_ingredients = 10
 w_instructions = 2
@@ -22,7 +22,7 @@ w_tags = 15
 
 def calc_count_vectorizer_model(all_recipes):
     print('calculating count vectorizer')
-    df = all_recipes[~all_recipes['url'].str.contains("in-hindi")]
+    df = all_recipes[~all_recipes['url'].str.contains("in-hindi")].reset_index(drop=True)
     df = _convert_values(df)
     df['features'] = df.apply(_concatenate_features, axis=1)
     df['features'] = df['features'].apply(_process_text)
@@ -37,10 +37,8 @@ def calc_count_vectorizer_model(all_recipes):
 
 def generate_count_vectorizer_recommendations(recipe_index, all_recipes):
     cosine_similarity_matrix = _load_model()
-    recipes_without_current_recipe = all_recipes[
-        all_recipes['index'] != recipe_index]
-    recipes_without_hindi = recipes_without_current_recipe[
-        ~recipes_without_current_recipe['url'].str.contains("in-hindi")]
+    recipes_without_hindi = all_recipes[
+        ~all_recipes['url'].str.contains("in-hindi")].reset_index(drop=True)
 
     df = recommendations(recipes_without_hindi, cosine_similarity_matrix, 20, recipe_index=recipe_index)
     recipes_json = json.loads(df.to_json(orient='records'))
