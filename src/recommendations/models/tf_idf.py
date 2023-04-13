@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from src.infra.postgres_connector import get_df_from
 from src.recommendations.consts import GET_USER_TOP_RATED_RECIPES_QUERY, \
     RECIPE_AMOUNT, TF_IDF_FILE_LOCATION
-from src.recommendations.models.base import recommendations
+from src.recommendations.models.content_based import recommendations
 
 
 # TODO: This model receives a recipe title (I think I can change it to recipe index),
@@ -51,7 +51,7 @@ def _process_text(text):
 
 
 def _build_section(recipe_title, all_recipes, cosine_similarity_matrix, rank):
-    df = recommendations(all_recipes, cosine_similarity_matrix, 20, recipe_title)
+    df = recommendations(all_recipes, cosine_similarity_matrix, 20, recipe_title=recipe_title)
     recipes_json = json.loads(df.to_json(orient='records'))
 
     return {'name': 'Because You Liked {}'.format(recipe_title), 'recipes': recipes_json, 'rank': rank}
