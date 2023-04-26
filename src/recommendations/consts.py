@@ -9,7 +9,7 @@ COLD_START_RATING_AMOUNT = 3
 COUNT_USER_RATINGS_QUERY = "select count(*) from ratings where user_id = '{}'"
 ALL_RECIPES_QUERY = "select * from recipes"
 ALL_RATINGS_QUERY = "select * from ratings;"
-USER_RATINGS_COLUMNS = ['user_id', 'recipe_index', 'rating']
+USER_RATINGS_COLUMNS = ['user_id', 'recipe_index', 'rating', 'rating_timestamp']
 GET_USER_TOP_RATED_RECIPES_QUERY = "select recipes.recipe_title from ratings, recipes \
                                         where ratings.user_id = '{}' \
                                         and ratings.recipe_index = recipes.index \
