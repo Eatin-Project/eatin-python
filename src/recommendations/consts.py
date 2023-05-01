@@ -1,3 +1,4 @@
+from enum import Enum
 import json
 import os
 
@@ -38,8 +39,37 @@ where category = '{}' \
 order by (vote_count * rating) desc \
 limit 20;"
 
+USER_RECIPES_CONNECTION_QUERY = "select user_id, is_saved, is_uploaded, given_comment from userrecipes \
+where recipe_index = '{}' "
+
+
+RECIPES_BY_IS_SAVED_QUERY = "select is_saved, is_uploaded, given_comment, index, recipe_title, url, \
+                                     record_health, vote_count, rating, description, cuisine, course, diet, prep_time, \
+                                     cook_time, ingredients, instructions, author, tags, category, image, difficulty, \
+                                     total_time  \
+                                     from userrecipes \
+                                     where user_id = '{}' where is_saved = '{}'\
+                                     inner join recipes on index = recipe_index"
+
+RECIPES_BY_IS_UPLOADED_QUERY = "select is_saved, is_uploaded, given_comment, index, recipe_title, url, \
+                                     record_health, vote_count, rating, description, cuisine, course, diet, prep_time, \
+                                     cook_time, ingredients, instructions, author, tags, category, image, difficulty, \
+                                     total_time  \
+                                     from userrecipes \
+                                     where user_id = '{}' where is_uploaded = '{}' \
+                                     inner join recipes on index = recipe_index"
+
+RECIPES_BY_COMMENT_EXISTS_QUERY = "select is_saved, is_uploaded, given_comment, index, recipe_title, url, \
+                                     record_health, vote_count, rating, description, cuisine, course, diet, prep_time, \
+                                     cook_time, ingredients, instructions, author, tags, category, image, difficulty, \
+                                     total_time  \
+                                     from userrecipes \
+                                     where user_id = '{}' where len(given_comment) '{}' \
+                                     inner join recipes on index = recipe_index"
+
 
 TOP_CATEGORIES_COLUMNS = ['category', 'recipe_count', 'total_votes', 'average_rating', 'popularity_score', 'row_num']
+
 RECIPE_COLUMNS = ['index',
                   'recipe_title',
                   'url',
@@ -61,6 +91,39 @@ RECIPE_COLUMNS = ['index',
                   'difficulty',
                   'total_time']
 
+USER_RECIPE_CONNECTION_COLUMNS = [
+    'user_id',
+    'is_saved',
+    'is_uploaded',
+    'given_comment'
+]
+
+USER_RECIPE_WITH_FULL_RECIPE_COLUMNS = [
+    'index',
+     'recipe_title',
+     'url',
+     'record_health',
+     'vote_count',
+     'rating',
+    'description',
+     'cuisine',
+     'course',
+     'diet',
+     'prep_time',
+     'cook_time',
+    'ingredients',
+    'instructions',
+    'author',
+    'tags',
+    'category',
+    'image',
+    'difficulty',
+    'total_time',
+    'is_saved',
+    'is_uploaded',
+    'given_comment'
+]
+
 
 TF_IDF_FILE_LOCATION = os.path.join('models', 'tf_idf.joblib')
 COUNT_VECTORIZER_FILE_LOCATION = os.path.join('models', 'count-vectorizer.joblib')
@@ -76,3 +139,5 @@ def get_recipes():
     all_recipes['tags'] = [json.dumps(tag.tolist()) for tag in all_recipes['tags']]
 
     return all_recipes
+
+

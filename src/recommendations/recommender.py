@@ -3,7 +3,9 @@ import math
 
 from src.infra.postgres_connector import connect, execute_select, get_df_from
 from src.recommendations.consts import MOST_POPULAR_QUERY, RECIPE_COLUMNS, TOP_CATEGORIES_QUERY, TOP_CATEGORIES_COLUMNS, \
-    TOP_RECIPES_FOR_CATEGORY_QUERY, COUNT_USER_RATINGS_QUERY, COLD_START_RATING_AMOUNT, get_recipes
+    TOP_RECIPES_FOR_CATEGORY_QUERY, COUNT_USER_RATINGS_QUERY, COLD_START_RATING_AMOUNT, get_recipes, \
+    USER_RECIPES_CONNECTION_QUERY, USER_RECIPE_CONNECTION_COLUMNS, RECIPES_BY_IS_SAVED_QUERY, \
+    USER_RECIPE_WITH_FULL_RECIPE_COLUMNS, RECIPES_BY_IS_UPLOADED_QUERY, RECIPES_BY_COMMENT_EXISTS_QUERY
 from src.recommendations.models.count_vectorizer import generate_count_vectorizer_recommendations
 from src.recommendations.models.svd import generate_svd_recommendations
 from src.recommendations.models.tf_idf import generate_tf_idf_recommendations
@@ -21,8 +23,32 @@ def get_recipes_sections(user_id):
     recipes = _recommend_recipes(user_id, conn, get_recipes()) + _get_cold_start_recipes(user_id, conn)
     recipes.sort(key=get_rank)
     conn.close()
-
     return recipes
+
+
+def get_recipes_with_connection_by_is_saved(user_id, is_saved):
+    conn = connect()
+    query = execute_select(conn,
+                           RECIPES_BY_IS_SAVED_QUERY.format(user_id, is_saved),
+                           USER_RECIPE_WITH_FULL_RECIPE_COLUMNS)
+    return json.loads(query.to_json(orient='records'))
+
+
+def get_recipes_with_connection_by_is_uploaded(user_id, is_uploaded):
+    conn = connect()
+    query = execute_select(conn,
+                           RECIPES_BY_IS_UPLOADED_QUERY.format(user_id, is_uploaded),
+                           USER_RECIPE_WITH_FULL_RECIPE_COLUMNS)
+    return json.loads(query.to_json(orient='records'))
+
+
+def get_recipes_with_connection_by_given_comment(user_id, does_comment_exist):
+    conn = connect()
+    condition = '> 0' if does_comment_exist else '= 0'
+    query = execute_select(conn,
+                           RECIPES_BY_COMMENT_EXISTS_QUERY.format(user_id, condition),
+                           USER_RECIPE_WITH_FULL_RECIPE_COLUMNS)
+    return json.loads(query.to_json(orient='records'))
 
 
 def get_rank(element):
@@ -50,7 +76,7 @@ def _get_cold_start_recipes(user_id, conn):
     # TODO: this takes 0.5 seconds. optional: save this in a parquet file when saving the model
     category_sections = [_create_sections_of(category.category, _get_rank(len(top_categories_df), category.row_num)
                                              , conn) for category in top_categories_df.itertuples()]
-    recipes_json = json.loads(most_popular_df.to_json(orient='records'))
+    recipes_json = _get_updated_recipes(conn, json.loads(most_popular_df.to_json(orient='records')))
     popular_section = [{'name': 'Popular On Eatin', 'recipes': recipes_json, 'rank': 0}]
 
     return popular_section + category_sections
@@ -61,9 +87,22 @@ def _get_rank(length, row):
     return (row / chunk) // 1 + 1
 
 
+def _get_updated_recipes(conn, recipes):
+    updated_recipes = recipes
+    for i in range(len(recipes)):
+        query = execute_select(conn,
+                               USER_RECIPES_CONNECTION_QUERY.format(recipes[i]["index"]),
+                               USER_RECIPE_CONNECTION_COLUMNS)
+        if not query.empty:
+            updated_recipes[i]["user_info"] = json.loads(query.to_json(orient='records'))
+        else:
+            updated_recipes[i]["user_info"] = []
+    return updated_recipes
+
+
 def _create_sections_of(category, rank, conn):
     df = execute_select(conn, TOP_RECIPES_FOR_CATEGORY_QUERY.format(category), RECIPE_COLUMNS)
-    recipes_json = json.loads(df.to_json(orient='records'))
+    recipes_json = _get_updated_recipes(conn, json.loads(df.to_json(orient='records')))
     return {'name': category, 'recipes': recipes_json, 'rank': int(rank)}
 
 
