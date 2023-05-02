@@ -1,4 +1,5 @@
 import json
+import random
 
 import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -6,7 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from src.infra.postgres_connector import get_df_from
 from src.recommendations.consts import GET_USER_TOP_RATED_RECIPES_QUERY, \
-    RECIPE_AMOUNT, TF_IDF_FILE_LOCATION
+    RECIPE_AMOUNT, TF_IDF_FILE_LOCATION, RATING_LOWER_BOUND
 from src.recommendations.models.content_based import recommendations
 
 
@@ -19,11 +20,15 @@ from src.recommendations.models.content_based import recommendations
 #       4. combine the results and drop duplicates
 def generate_tf_idf_recommendations(user_id, conn, all_recipes):
     cosine_similarity_matrix = _load_model()
-    user_liked_recipes_df = get_df_from(GET_USER_TOP_RATED_RECIPES_QUERY.format(user_id, RECIPE_AMOUNT),
-                                        ['recipe_title'], conn)
+    user_liked_recipes_df = get_df_from(
+        GET_USER_TOP_RATED_RECIPES_QUERY.format(user_id, RATING_LOWER_BOUND, RECIPE_AMOUNT),
+        ['recipe_title'], conn)
 
-    return [_build_section(recipe_title, all_recipes, cosine_similarity_matrix, index + 1) for index, recipe_title in
-            enumerate(user_liked_recipes_df['recipe_title'])]
+    return [_build_we_bet_you_like_section(all_recipes, cosine_similarity_matrix,
+                                user_liked_recipes_df.iloc[:3]['recipe_title'])] + [
+        _build_because_you_like_section(recipe_title, all_recipes, cosine_similarity_matrix, index + 1)
+        for index, recipe_title in
+        enumerate(user_liked_recipes_df.iloc[3:6]['recipe_title'])]
 
 
 def calc_tf_idf_model(all_recipes):
@@ -50,7 +55,19 @@ def _process_text(text):
     return text
 
 
-def _build_section(recipe_title, all_recipes, cosine_similarity_matrix, rank):
+def _build_we_bet_you_like_section(all_recipes, cosine_similarity_matrix, top_recipes_df):
+    recipes = []
+    for recipe in top_recipes_df:
+        df = recommendations(all_recipes, cosine_similarity_matrix, 5, recipe)
+        recipes = recipes + json.loads(df.to_json(orient='records'))
+
+    random.shuffle(recipes)
+    return {'name': 'We Bet You\'ll Like These',
+            'recipes': recipes,
+            'rank': 0.1}
+
+
+def _build_because_you_like_section(recipe_title, all_recipes, cosine_similarity_matrix, rank):
     df = recommendations(all_recipes, cosine_similarity_matrix, 20, recipe_title=recipe_title)
     recipes_json = json.loads(df.to_json(orient='records'))
 
