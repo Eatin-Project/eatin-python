@@ -17,7 +17,27 @@ GET_USER_TOP_RATED_RECIPES_QUERY = "select recipes.recipe_title from ratings, re
                                         order by ratings.rating desc \
                                         limit {}"
 
-MOST_POPULAR_QUERY = "select * from recipes order by vote_count desc, rating desc limit 20;"
+MOST_POPULAR_QUERY = "select index, recipe_title, url, record_health, vote_count, rating, description, cuisine, course,\
+                  diet, prep_time, cook_time, ingredients, instructions, author, tags, category, image, difficulty, \
+                  total_time, \
+  case when userrecipes.is_saved is NULL then false else userrecipes.is_saved end as is_saved,\
+ case when userrecipes.is_uploaded is NULL then false else userrecipes.is_uploaded end as is_uploaded,\
+ case when userrecipes.given_comment is NULL then '' else userrecipes.given_comment end as given_comment \
+                  from recipes \
+                    left outer join userrecipes on recipes.index = userrecipes.recipe_index and userrecipes.user_id = '{}' \
+                    order by vote_count desc, rating desc limit 20;"
+
+TOP_RECIPES_FOR_CATEGORY_QUERY = "select index, recipe_title, url, record_health, vote_count, rating, description, cuisine,\
+                                 course, diet, prep_time, cook_time, ingredients, instructions,\
+                                  author, tags, category, image, difficulty, total_time, \
+  case when userrecipes.is_saved is NULL then false else userrecipes.is_saved end as is_saved,\
+ case when userrecipes.is_uploaded is NULL then false else userrecipes.is_uploaded end as is_uploaded,\
+ case when userrecipes.given_comment is NULL then '' else  userrecipes.given_comment end as given_comment \
+                                 from recipes \
+left outer join userrecipes on recipes.index = userrecipes.recipe_index and userrecipes.user_id = '{}'\
+where category = '{}'\
+order by (vote_count * rating) desc \
+limit 20;"
 
 POPULARITY = "(0.4 * SUM(vote_count) + 0.4 * AVG(rating) + 0.2 * COUNT(*))"
 
@@ -34,39 +54,12 @@ ORDER BY popularity_score DESC \
 LIMIT 10;".format(POPULARITY)
 
 
-TOP_RECIPES_FOR_CATEGORY_QUERY = "select * from recipes \
-where category = '{}' \
-order by (vote_count * rating) desc \
-limit 20;"
-
-USER_RECIPES_CONNECTION_QUERY = "select user_id, is_saved, is_uploaded, given_comment from userrecipes \
-where recipe_index = '{}' "
-
-
-RECIPES_BY_IS_SAVED_QUERY = "select is_saved, is_uploaded, given_comment, index, recipe_title, url, \
-                                     record_health, vote_count, rating, description, cuisine, course, diet, prep_time, \
-                                     cook_time, ingredients, instructions, author, tags, category, image, difficulty, \
-                                     total_time  \
+RECIPES_WITH_USER_CONNECTION_QUERY = "select  index, recipe_title, url, record_health, vote_count, rating, description, cuisine,\
+                                 course, diet, prep_time, cook_time, ingredients, instructions,\
+                                  author, tags, category, image, difficulty, total_time,\
                                      from userrecipes \
-                                     where user_id = '{}' where is_saved = '{}'\
-                                     inner join recipes on index = recipe_index"
-
-RECIPES_BY_IS_UPLOADED_QUERY = "select is_saved, is_uploaded, given_comment, index, recipe_title, url, \
-                                     record_health, vote_count, rating, description, cuisine, course, diet, prep_time, \
-                                     cook_time, ingredients, instructions, author, tags, category, image, difficulty, \
-                                     total_time  \
-                                     from userrecipes \
-                                     where user_id = '{}' where is_uploaded = '{}' \
-                                     inner join recipes on index = recipe_index"
-
-RECIPES_BY_COMMENT_EXISTS_QUERY = "select is_saved, is_uploaded, given_comment, index, recipe_title, url, \
-                                     record_health, vote_count, rating, description, cuisine, course, diet, prep_time, \
-                                     cook_time, ingredients, instructions, author, tags, category, image, difficulty, \
-                                     total_time  \
-                                     from userrecipes \
-                                     where user_id = '{}' where len(given_comment) '{}' \
-                                     inner join recipes on index = recipe_index"
-
+                                     inner join recipes on index = recipe_index\
+                            where userrecipes.user_id = '{}' and '{}'"
 
 TOP_CATEGORIES_COLUMNS = ['category', 'recipe_count', 'total_votes', 'average_rating', 'popularity_score', 'row_num']
 
@@ -91,38 +84,29 @@ RECIPE_COLUMNS = ['index',
                   'difficulty',
                   'total_time']
 
-USER_RECIPE_CONNECTION_COLUMNS = [
-    'user_id',
-    'is_saved',
-    'is_uploaded',
-    'given_comment'
-]
-
-USER_RECIPE_WITH_FULL_RECIPE_COLUMNS = [
-    'index',
-     'recipe_title',
-     'url',
-     'record_health',
-     'vote_count',
-     'rating',
-    'description',
-     'cuisine',
-     'course',
-     'diet',
-     'prep_time',
-     'cook_time',
-    'ingredients',
-    'instructions',
-    'author',
-    'tags',
-    'category',
-    'image',
-    'difficulty',
-    'total_time',
-    'is_saved',
-    'is_uploaded',
-    'given_comment'
-]
+UPDATED_RECIPE_COLUMNS = ['index',
+                          'recipe_title',
+                          'url',
+                          'record_health',
+                          'vote_count',
+                          'rating',
+                          'description',
+                          'cuisine',
+                          'course',
+                          'diet',
+                          'prep_time',
+                          'cook_time',
+                          'ingredients',
+                          'instructions',
+                          'author',
+                          'tags',
+                          'category',
+                          'image',
+                          'difficulty',
+                          'total_time',
+                          'is_saved',
+                          'is_uploaded',
+                          'given_comment']
 
 
 TF_IDF_FILE_LOCATION = os.path.join('models', 'tf_idf.joblib')
@@ -139,5 +123,3 @@ def get_recipes():
     all_recipes['tags'] = [json.dumps(tag.tolist()) for tag in all_recipes['tags']]
 
     return all_recipes
-
-

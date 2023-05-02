@@ -4,11 +4,10 @@ import typing
 import strawberry
 from strawberry.schema.config import StrawberryConfig
 
-from src.api.models.recipe import Section, FullSingleRecipeOfUser
+from src.api.models.recipe import Section, Recipe
 from src.recommendations.recommender import get_recipes_sections,\
     get_similar_recipes,\
     get_recipes_with_connection_by_is_saved,\
-    get_recipes_with_connection_by_given_comment,\
     get_recipes_with_connection_by_is_uploaded
 
 
@@ -30,18 +29,13 @@ def sections_resolver(user_id: str) -> typing.List[Section]:
 
 
 def recipes_with_connection_by_is_saved_resolver(user_id: str, is_saved: bool) ->\
-        typing.List[FullSingleRecipeOfUser]:
+        typing.List[Recipe]:
     return get_recipes_with_connection_by_is_saved(user_id, is_saved)
 
 
 def recipes_with_connection_by_is_uploaded_resolver(user_id: str, is_uploaded: bool) ->\
-        typing.List[FullSingleRecipeOfUser]:
+        typing.List[Recipe]:
     return get_recipes_with_connection_by_is_uploaded(user_id, is_uploaded)
-
-
-def recipes_with_connection_by_comment_resolver(user_id: str, does_comment_exist: bool) ->\
-        typing.List[FullSingleRecipeOfUser]:
-    return get_recipes_with_connection_by_given_comment(user_id, does_comment_exist)
 
 
 def similar_recipes_resolver(recipe_index: int) -> typing.List[Section]:
@@ -54,7 +48,6 @@ class Query:
     similar_recipes: typing.List[Section] = strawberry.field(resolver=similar_recipes_resolver)
     recipes_connection_is_saved = strawberry.field(resolver=recipes_with_connection_by_is_saved_resolver)
     recipes_connection_is_uploaded = strawberry.field(resolver=recipes_with_connection_by_is_uploaded_resolver)
-    recipes_connection_comment = strawberry.field(resolver=recipes_with_connection_by_comment_resolver)
 
 
 schema = strawberry.Schema(query=Query, config=config)
