@@ -54,12 +54,19 @@ ORDER BY popularity_score DESC \
 LIMIT 10;".format(POPULARITY)
 
 
-RECIPES_WITH_USER_CONNECTION_QUERY = "select  index, recipe_title, url, record_health, vote_count, rating, description, cuisine,\
+SAVED_RECIPES_QUERY = "select  index, recipe_title, url, record_health, vote_count, rating, description, cuisine,\
                                  course, diet, prep_time, cook_time, ingredients, instructions,\
-                                  author, tags, category, image, difficulty, total_time,\
+                                  author, tags, category, image, difficulty, total_time\
                                      from userrecipes \
-                                     inner join recipes on index = recipe_index\
-                            where userrecipes.user_id = '{}' and '{}'"
+                                     left outer join recipes on index = recipe_index\
+                            where userrecipes.user_id = '{}' and userrecipes.is_saved = '{}'"
+
+UPLOADED_RECIPES_QUERY = "select  index, recipe_title, url, record_health, vote_count, rating, description, cuisine,\
+                                 course, diet, prep_time, cook_time, ingredients, instructions,\
+                                  author, tags, category, image, difficulty, total_time\
+                                     from userrecipes \
+                                     left outer join recipes on index = recipe_index\
+                            where userrecipes.user_id = '{}' and userrecipes.is_uploaded = '{}'"
 
 TOP_CATEGORIES_COLUMNS = ['category', 'recipe_count', 'total_votes', 'average_rating', 'popularity_score', 'row_num']
 
