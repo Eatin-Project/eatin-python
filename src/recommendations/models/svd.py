@@ -23,9 +23,9 @@ def generate_svd_recommendations(user_id, conn, recipes_df):
 
     recipe_predictions.sort(key=lambda x: x[0], reverse=True)
 
-    return [{'name': 'We Bet You\'ll Like These',
+    return [{'name': 'Other Users Liked',
              'recipes': json.loads(pd.concat([recipe[1] for recipe in recipe_predictions]).to_json(orient='records')),
-             'rank': 0.5}]
+             'rank': 3}]
 
 
 def calc_svd_model():

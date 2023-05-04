@@ -14,6 +14,11 @@ def get_similar_recipes(recipe_index):
     return generate_count_vectorizer_recommendations(recipe_index, get_recipes())
 
 
+# TODO:
+#   1. increase the number of recipes of the cold start up
+#   2. define a lower boundary for positive rating
+#   3. create section: "We bet You'll Like These" based on the most recent and most rated
+#   4. create other sections: "Because You Liked ... " based on the other recipes (if the rating is high enough)
 def get_recipes_sections(user_id):
     conn = connect()
     if _needs_cold_start(user_id, conn):

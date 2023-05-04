@@ -4,8 +4,9 @@ import os
 
 import pandas as pd
 
-RECIPE_AMOUNT = 3
+RECIPE_AMOUNT = 13
 COLD_START_RATING_AMOUNT = 3
+RATING_LOWER_BOUND = 3.5
 
 COUNT_USER_RATINGS_QUERY = "select count(*) from ratings where user_id = '{}'"
 ALL_RECIPES_QUERY = "select * from recipes"
@@ -14,7 +15,8 @@ USER_RATINGS_COLUMNS = ['user_id', 'recipe_index', 'rating', 'rating_timestamp']
 GET_USER_TOP_RATED_RECIPES_QUERY = "select recipes.recipe_title from ratings, recipes \
                                         where ratings.user_id = '{}' \
                                         and ratings.recipe_index = recipes.index \
-                                        order by ratings.rating desc \
+                                        and ratings.rating >= {} \
+                                        order by ratings.rating_timestamp desc, ratings.rating desc \
                                         limit {}"
 
 MOST_POPULAR_QUERY = "select index, recipe_title, url, record_health, vote_count, rating, description, cuisine, course,\
@@ -67,6 +69,8 @@ UPLOADED_RECIPES_QUERY = "select  index, recipe_title, url, record_health, vote_
                                      from userrecipes \
                                      left outer join recipes on index = recipe_index\
                             where userrecipes.user_id = '{}' and userrecipes.is_uploaded = '{}'"
+
+
 
 TOP_CATEGORIES_COLUMNS = ['category', 'recipe_count', 'total_votes', 'average_rating', 'popularity_score', 'row_num']
 
