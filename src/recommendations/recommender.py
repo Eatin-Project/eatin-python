@@ -10,8 +10,8 @@ from src.recommendations.models.svd import generate_svd_recommendations
 from src.recommendations.models.tf_idf import generate_tf_idf_recommendations
 
 
-def get_similar_recipes(recipe_index):
-    return generate_count_vectorizer_recommendations(recipe_index, get_recipes())
+def get_similar_recipes(recipe_index, user_id):
+    return generate_count_vectorizer_recommendations(recipe_index, get_recipes(), user_id)
 
 
 # TODO:

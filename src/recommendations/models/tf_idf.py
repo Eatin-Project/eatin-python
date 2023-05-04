@@ -25,8 +25,8 @@ def generate_tf_idf_recommendations(user_id, conn, all_recipes):
         ['recipe_title'], conn)
 
     return [_build_we_bet_you_like_section(all_recipes, cosine_similarity_matrix,
-                                user_liked_recipes_df.iloc[:3]['recipe_title'])] + [
-        _build_because_you_like_section(recipe_title, all_recipes, cosine_similarity_matrix, index + 1)
+                                           user_liked_recipes_df.iloc[:3]['recipe_title'], user_id, conn)] + [
+        _build_because_you_like_section(recipe_title, all_recipes, cosine_similarity_matrix, index + 1, user_id, conn)
         for index, recipe_title in
         enumerate(user_liked_recipes_df.iloc[3:6]['recipe_title'])]
 
@@ -55,10 +55,10 @@ def _process_text(text):
     return text
 
 
-def _build_we_bet_you_like_section(all_recipes, cosine_similarity_matrix, top_recipes_df):
+def _build_we_bet_you_like_section(all_recipes, cosine_similarity_matrix, top_recipes_df, user_id, conn):
     recipes = []
     for recipe in top_recipes_df:
-        df = recommendations(all_recipes, cosine_similarity_matrix, 5, recipe)
+        df = recommendations(all_recipes, cosine_similarity_matrix, 5, user_id, conn, recipe)
         recipes = recipes + json.loads(df.to_json(orient='records'))
 
     random.shuffle(recipes)
@@ -67,8 +67,8 @@ def _build_we_bet_you_like_section(all_recipes, cosine_similarity_matrix, top_re
             'rank': 0.1}
 
 
-def _build_because_you_like_section(recipe_title, all_recipes, cosine_similarity_matrix, rank):
-    df = recommendations(all_recipes, cosine_similarity_matrix, 20, recipe_title=recipe_title)
+def _build_because_you_like_section(recipe_title, all_recipes, cosine_similarity_matrix, rank, user_id, conn):
+    df = recommendations(all_recipes, cosine_similarity_matrix, 20, user_id, conn, recipe_title=recipe_title)
     recipes_json = json.loads(df.to_json(orient='records'))
 
     return {'name': 'Because You Liked {}'.format(recipe_title), 'recipes': recipes_json, 'rank': rank}
