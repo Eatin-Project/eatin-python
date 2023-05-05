@@ -1,4 +1,3 @@
-from enum import Enum
 import json
 import os
 
@@ -41,6 +40,16 @@ where category = '{}'\
 order by (vote_count * rating) desc \
 limit 20;"
 
+RECIPES_BY_INDEXES_QUERY = "select index, recipe_title, url, record_health, vote_count, rating, description, cuisine,\
+                                 course, diet, prep_time, cook_time, ingredients, instructions,\
+                                  author, tags, category, image, difficulty, total_time, \
+  case when userrecipes.is_saved is NULL then false else userrecipes.is_saved end as is_saved,\
+ case when userrecipes.is_uploaded is NULL then false else userrecipes.is_uploaded end as is_uploaded,\
+ case when userrecipes.given_comment is NULL then '' else  userrecipes.given_comment end as given_comment \
+                                 from recipes \
+left outer join userrecipes on recipes.index = userrecipes.recipe_index and userrecipes.user_id = '{}'\
+where recipes.index in {}"
+
 POPULARITY = "(0.4 * SUM(vote_count) + 0.4 * AVG(rating) + 0.2 * COUNT(*))"
 
 TOP_CATEGORIES_QUERY = "SELECT \
@@ -55,7 +64,6 @@ GROUP BY category \
 ORDER BY popularity_score DESC \
 LIMIT 10;".format(POPULARITY)
 
-
 SAVED_RECIPES_QUERY = "select  index, recipe_title, url, record_health, vote_count, rating, description, cuisine,\
                                  course, diet, prep_time, cook_time, ingredients, instructions,\
                                   author, tags, category, image, difficulty, total_time\
@@ -69,7 +77,6 @@ UPLOADED_RECIPES_QUERY = "select  index, recipe_title, url, record_health, vote_
                                      from userrecipes \
                                      left outer join recipes on index = recipe_index\
                             where userrecipes.user_id = '{}' and userrecipes.is_uploaded = '{}'"
-
 
 TOP_CATEGORIES_COLUMNS = ['category', 'recipe_count', 'total_votes', 'average_rating', 'popularity_score', 'row_num']
 
@@ -117,7 +124,6 @@ UPDATED_RECIPE_COLUMNS = ['index',
                           'is_saved',
                           'is_uploaded',
                           'given_comment']
-
 
 TF_IDF_FILE_LOCATION = os.path.join('models', 'tf_idf.joblib')
 COUNT_VECTORIZER_FILE_LOCATION = os.path.join('models', 'count-vectorizer.joblib')

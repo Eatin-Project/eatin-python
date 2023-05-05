@@ -5,9 +5,9 @@ import strawberry
 from strawberry.schema.config import StrawberryConfig
 
 from src.api.models.recipe import Section, Recipe
-from src.recommendations.recommender import get_recipes_sections,\
-    get_similar_recipes,\
-    get_recipes_with_connection_by_is_saved,\
+from src.recommendations.recommender import get_recipes_sections, \
+    get_similar_recipes, \
+    get_recipes_with_connection_by_is_saved, \
     get_recipes_with_connection_by_is_uploaded
 
 
@@ -28,18 +28,18 @@ def sections_resolver(user_id: str) -> typing.List[Section]:
     return get_recipes_sections(user_id)
 
 
-def recipes_with_connection_by_is_saved_resolver(user_id: str, is_saved: bool) ->\
+def recipes_with_connection_by_is_saved_resolver(user_id: str, is_saved: bool) -> \
         typing.List[Recipe]:
     return get_recipes_with_connection_by_is_saved(user_id, is_saved)
 
 
-def recipes_with_connection_by_is_uploaded_resolver(user_id: str, is_uploaded: bool) ->\
+def recipes_with_connection_by_is_uploaded_resolver(user_id: str, is_uploaded: bool) -> \
         typing.List[Recipe]:
     return get_recipes_with_connection_by_is_uploaded(user_id, is_uploaded)
 
 
-def similar_recipes_resolver(recipe_index: int) -> typing.List[Section]:
-    return get_similar_recipes(recipe_index)
+def similar_recipes_resolver(recipe_index: int, user_id: str) -> typing.List[Section]:
+    return get_similar_recipes(recipe_index, user_id)
 
 
 @strawberry.type

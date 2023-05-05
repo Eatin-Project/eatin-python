@@ -4,7 +4,9 @@ import joblib
 import pandas as pd
 from surprise import SVD, Dataset, Reader
 
-from src.recommendations.consts import SVD_FILE_LOCATION, RATINGS_PARQUET_LOCATION
+from src.infra.postgres_connector import get_df_from
+from src.recommendations.consts import SVD_FILE_LOCATION, RATINGS_PARQUET_LOCATION, RECIPES_BY_INDEXES_QUERY, \
+    UPDATED_RECIPE_COLUMNS
 
 
 def generate_svd_recommendations(user_id, conn, recipes_df):
@@ -22,9 +24,12 @@ def generate_svd_recommendations(user_id, conn, recipes_df):
         recipe_predictions.append((predicted_rating, recipes_df[recipes_df['index'] == recipe_id]))
 
     recipe_predictions.sort(key=lambda x: x[0], reverse=True)
+    indexes = [int(recipe[1].index[0]) for recipe in recipe_predictions]
 
     return [{'name': 'Other Users Liked',
-             'recipes': json.loads(pd.concat([recipe[1] for recipe in recipe_predictions]).to_json(orient='records')),
+             'recipes': json.loads(
+                 get_df_from(RECIPES_BY_INDEXES_QUERY.format(user_id, tuple(indexes)), UPDATED_RECIPE_COLUMNS,
+                             conn).to_json(orient='records')),
              'rank': 3}]
 
 
