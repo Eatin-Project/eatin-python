@@ -71,7 +71,6 @@ UPLOADED_RECIPES_QUERY = "select  index, recipe_title, url, record_health, vote_
                             where userrecipes.user_id = '{}' and userrecipes.is_uploaded = '{}'"
 
 
-
 TOP_CATEGORIES_COLUMNS = ['category', 'recipe_count', 'total_votes', 'average_rating', 'popularity_score', 'row_num']
 
 RECIPE_COLUMNS = ['index',
