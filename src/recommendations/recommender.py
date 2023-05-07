@@ -35,6 +35,7 @@ def get_recipes_with_connection_by_is_saved(user_id, is_saved):
     query = execute_select(conn,
                            SAVED_RECIPES_QUERY.format(user_id, 1 if is_saved else 0),
                            RECIPE_COLUMNS)
+    conn.close()
     return json.loads(query.to_json(orient='records'))
 
 
@@ -43,6 +44,7 @@ def get_recipes_with_connection_by_is_uploaded(user_id, is_uploaded):
     query = execute_select(conn,
                            UPLOADED_RECIPES_QUERY.format(user_id, 1 if is_uploaded else 0),
                            RECIPE_COLUMNS)
+    conn.close()
     return json.loads(query.to_json(orient='records'))
 
 
