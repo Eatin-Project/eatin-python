@@ -1,5 +1,4 @@
 import typing
-
 import strawberry
 
 
@@ -28,6 +27,13 @@ class Recipe:
 
 
 @strawberry.type
+class UpdatedRecipe(Recipe):
+    is_saved: bool
+    is_uploaded: bool
+    given_comment: str
+
+
+@strawberry.type
 class Section:
     name: str
-    recipes: typing.List[Recipe]
+    recipes: typing.List[UpdatedRecipe]

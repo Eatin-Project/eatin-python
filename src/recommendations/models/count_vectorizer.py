@@ -4,6 +4,7 @@ import joblib
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+from src.infra.postgres_connector import connect
 from src.recommendations.consts import COUNT_VECTORIZER_FILE_LOCATION
 from src.recommendations.models.content_based import recommendations
 
@@ -35,12 +36,14 @@ def calc_count_vectorizer_model(all_recipes):
     print('finished calculating count vectorizer')
 
 
-def generate_count_vectorizer_recommendations(recipe_index, all_recipes):
+def generate_count_vectorizer_recommendations(recipe_index, all_recipes, user_id):
     cosine_similarity_matrix = _load_model()
     recipes_without_hindi = all_recipes[
         ~all_recipes['url'].str.contains("in-hindi")].reset_index(drop=True)
 
-    df = recommendations(recipes_without_hindi, cosine_similarity_matrix, 20, recipe_index=recipe_index)
+    conn = connect()
+    df = recommendations(recipes_without_hindi, cosine_similarity_matrix, 20, user_id, conn, recipe_index=recipe_index)
+    conn.close()
     recipes_json = json.loads(df.to_json(orient='records'))
 
     return [{'name': 'Similar Recipes', 'recipes': recipes_json, 'rank': 0}]
