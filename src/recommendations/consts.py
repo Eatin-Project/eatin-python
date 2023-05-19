@@ -22,8 +22,7 @@ MOST_POPULAR_QUERY = "select index, recipe_title, url, record_health, vote_count
                   diet, prep_time, cook_time, ingredients, instructions, author, tags, category, image, difficulty, \
                   total_time, \
   case when userrecipes.is_saved is NULL then false else userrecipes.is_saved end as is_saved,\
- case when userrecipes.is_uploaded is NULL then false else userrecipes.is_uploaded end as is_uploaded,\
- case when userrecipes.given_comment is NULL then '' else userrecipes.given_comment end as given_comment \
+ case when userrecipes.is_uploaded is NULL then false else userrecipes.is_uploaded end as is_uploaded\
                   from recipes \
                     left outer join userrecipes on recipes.index = userrecipes.recipe_index and userrecipes.user_id = '{}' \
                     order by vote_count desc, rating desc limit 20;"
@@ -32,8 +31,7 @@ TOP_RECIPES_FOR_CATEGORY_QUERY = "select index, recipe_title, url, record_health
                                  course, diet, prep_time, cook_time, ingredients, instructions,\
                                   author, tags, category, image, difficulty, total_time, \
   case when userrecipes.is_saved is NULL then false else userrecipes.is_saved end as is_saved,\
- case when userrecipes.is_uploaded is NULL then false else userrecipes.is_uploaded end as is_uploaded,\
- case when userrecipes.given_comment is NULL then '' else  userrecipes.given_comment end as given_comment \
+ case when userrecipes.is_uploaded is NULL then false else userrecipes.is_uploaded end as is_uploaded\
                                  from recipes \
 left outer join userrecipes on recipes.index = userrecipes.recipe_index and userrecipes.user_id = '{}'\
 where category = '{}'\
@@ -44,8 +42,7 @@ RECIPES_BY_INDEXES_QUERY = "select index, recipe_title, url, record_health, vote
                                  course, diet, prep_time, cook_time, ingredients, instructions,\
                                   author, tags, category, image, difficulty, total_time, \
   case when userrecipes.is_saved is NULL then false else userrecipes.is_saved end as is_saved,\
- case when userrecipes.is_uploaded is NULL then false else userrecipes.is_uploaded end as is_uploaded,\
- case when userrecipes.given_comment is NULL then '' else  userrecipes.given_comment end as given_comment \
+ case when userrecipes.is_uploaded is NULL then false else userrecipes.is_uploaded end as is_uploaded\
                                  from recipes \
 left outer join userrecipes on recipes.index = userrecipes.recipe_index and userrecipes.user_id = '{}'\
 where recipes.index in {}"
@@ -108,8 +105,7 @@ UPDATED_RECIPE_COLUMNS = ['index',
                           'difficulty',
                           'total_time',
                           'is_saved',
-                          'is_uploaded',
-                          'given_comment']
+                          'is_uploaded']
 
 TF_IDF_FILE_LOCATION = os.path.join('models', 'tf_idf.joblib')
 COUNT_VECTORIZER_FILE_LOCATION = os.path.join('models', 'count-vectorizer.joblib')
