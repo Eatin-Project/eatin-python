@@ -30,7 +30,6 @@ class Recipe:
 class UpdatedRecipe(Recipe):
     is_saved: bool
     is_uploaded: bool
-    given_comment: str
 
 
 @strawberry.type

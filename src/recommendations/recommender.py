@@ -4,7 +4,7 @@ import math
 from src.infra.postgres_connector import connect, execute_select, get_df_from
 from src.recommendations.consts import MOST_POPULAR_QUERY, TOP_CATEGORIES_QUERY, TOP_CATEGORIES_COLUMNS, \
     TOP_RECIPES_FOR_CATEGORY_QUERY, COUNT_USER_RATINGS_QUERY, COLD_START_RATING_AMOUNT, get_recipes, \
-    RECIPE_COLUMNS, UPDATED_RECIPE_COLUMNS, SAVED_RECIPES_QUERY, UPLOADED_RECIPES_QUERY
+    RECIPE_COLUMNS, UPDATED_RECIPE_COLUMNS
 from src.recommendations.models.count_vectorizer import generate_count_vectorizer_recommendations
 from src.recommendations.models.svd import generate_svd_recommendations
 from src.recommendations.models.tf_idf import generate_tf_idf_recommendations
@@ -28,24 +28,6 @@ def get_recipes_sections(user_id):
     recipes.sort(key=get_rank)
     conn.close()
     return recipes
-
-
-def get_recipes_with_connection_by_is_saved(user_id, is_saved):
-    conn = connect()
-    query = execute_select(conn,
-                           SAVED_RECIPES_QUERY.format(user_id, 1 if is_saved else 0),
-                           RECIPE_COLUMNS)
-    conn.close()
-    return json.loads(query.to_json(orient='records'))
-
-
-def get_recipes_with_connection_by_is_uploaded(user_id, is_uploaded):
-    conn = connect()
-    query = execute_select(conn,
-                           UPLOADED_RECIPES_QUERY.format(user_id, 1 if is_uploaded else 0),
-                           RECIPE_COLUMNS)
-    conn.close()
-    return json.loads(query.to_json(orient='records'))
 
 
 def get_rank(element):
