@@ -32,7 +32,6 @@ TOP_RECIPES_FOR_CATEGORY_QUERY = "select index, recipe_title, url, record_health
                                   author, tags, category, image, difficulty, total_time, \
  case when userrecipes.is_saved is NULL then false else userrecipes.is_saved end as is_saved,\
  case when userrecipes.is_uploaded is NULL then false else userrecipes.is_uploaded end as is_uploaded,\
- case when userrecipes.given_comment is NULL then '' else  userrecipes.given_comment end as given_comment \
                                  from recipes \
 left outer join userrecipes on recipes.index = userrecipes.recipe_index and userrecipes.user_id = '{}'\
 where category = '{}'\

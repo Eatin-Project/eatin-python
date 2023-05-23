@@ -7,9 +7,7 @@ from strawberry.schema.config import StrawberryConfig
 from src.api.models.recipe import Section, Recipe
 from src.recommendations.recommendation_updater import update_recommendations
 from src.recommendations.recommender import get_recipes_sections, \
-    get_similar_recipes, \
-    get_recipes_with_connection_by_is_saved, \
-    get_recipes_with_connection_by_is_uploaded
+    get_similar_recipes
 
 
 def default_resolver(root, field):
