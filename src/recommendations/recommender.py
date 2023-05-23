@@ -19,14 +19,12 @@ def get_similar_recipes(recipe_index, user_id):
 #   2. define a lower boundary for positive rating
 #   3. create section: "We bet You'll Like These" based on the most recent and most rated
 #   4. create other sections: "Because You Liked ... " based on the other recipes (if the rating is high enough)
-def get_recipes_sections(user_id):
-    conn = connect()
+def get_recipes_sections(conn, user_id):
     if _needs_cold_start(user_id, conn):
         return _get_cold_start_recipes(user_id, conn)
 
     recipes = _recommend_recipes(user_id, conn, get_recipes()) + _get_cold_start_recipes(user_id, conn)
     recipes.sort(key=get_rank)
-    conn.close()
     return recipes
 
 

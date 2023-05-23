@@ -18,6 +18,13 @@ def connect():
     return conn
 
 
+def execute_insert(conn, query, values):
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+
+
 def execute_select(conn, query, column_names):
     cursor = conn.cursor()
     data = pd.DataFrame()

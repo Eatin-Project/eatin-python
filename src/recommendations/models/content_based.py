@@ -13,7 +13,7 @@ def recommendations(df, cosine_similarity_matrix, number_of_recommendations, use
     recommendations_indices = [score[0] for score in similarity_scores_sorted[1:(number_of_recommendations + 1)]]
     recommended_recipes = df.iloc[recommendations_indices]
 
-    return get_df_from(RECIPES_BY_INDEXES_QUERY.format(user_id, tuple(recommended_recipes.index.tolist())),
+    return get_df_from(RECIPES_BY_INDEXES_QUERY.format(user_id, tuple(recommended_recipes['index'].tolist())),
                        UPDATED_RECIPE_COLUMNS, conn)
 
 
