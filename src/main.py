@@ -16,7 +16,7 @@ graphql_app = GraphQLRouter(schema)
 
 app = FastAPI()
 app.add_middleware(
-    CORSMiddleware, allow_headers=["*"], allow_origins=["http://localhost:3000", "http://eatin.cs.colman.ac.il:3000"], allow_methods=["*"]
+    CORSMiddleware, allow_headers=["*"], allow_origins=["*"], allow_methods=["*"]
 )
 
 
