@@ -1,4 +1,3 @@
-import json
 import os
 
 import pandas as pd
@@ -8,7 +7,7 @@ COLD_START_RATING_AMOUNT = 3
 RATING_LOWER_BOUND = 3.5
 
 COUNT_USER_RATINGS_QUERY = "select count(*) from ratings where user_id = '{}'"
-ALL_RECIPES_QUERY = "select * from recipes"
+ALL_RECIPES_QUERY = "select * from recipes;"
 ALL_RATINGS_QUERY = "select * from ratings;"
 USER_RATINGS_COLUMNS = ['user_id', 'recipe_index', 'rating', 'rating_timestamp']
 GET_USER_TOP_RATED_RECIPES_QUERY = "select recipes.recipe_title from ratings, recipes \
@@ -115,9 +114,5 @@ RATINGS_PARQUET_LOCATION = os.path.join('dataset', 'ratings.parquet.gzip')
 
 
 def get_recipes():
-    all_recipes = pd.read_parquet(RECIPES_PARQUET_LOCATION).reset_index()
-    all_recipes['ingredients'] = [json.dumps(ingredient.tolist()) for ingredient in all_recipes['ingredients']]
-    all_recipes['instructions'] = [json.dumps(instruction.tolist()) for instruction in all_recipes['instructions']]
-    all_recipes['tags'] = [json.dumps(tag.tolist()) for tag in all_recipes['tags']]
+    return pd.read_parquet(RECIPES_PARQUET_LOCATION).reset_index()
 
-    return all_recipes

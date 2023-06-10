@@ -5,6 +5,7 @@ import strawberry
 from strawberry.schema.config import StrawberryConfig
 
 from src.api.models.recipe import Section, Recipe
+from src.recommendations.model_initializer import calculate_recommendation_models
 from src.recommendations.recommendation_updater import update_recommendations
 from src.recommendations.recommender import get_recipes_sections, \
     get_similar_recipes
@@ -35,6 +36,11 @@ def update_recommendations_feed(user_id: str) -> str:
     return update_recommendations(user_id)
 
 
+def calculate_models() -> None:
+    calculate_recommendation_models()
+    return
+
+
 @strawberry.type
 class Query:
     sections: typing.List[Section] = strawberry.field(resolver=sections_resolver)
@@ -44,6 +50,7 @@ class Query:
 @strawberry.type
 class Mutation:
     update_user_recommendations = strawberry.mutation(resolver=update_recommendations_feed)
+    calculate_models = strawberry.mutation(resolver=calculate_models)
 
 
 schema = strawberry.Schema(query=Query, mutation=Mutation, config=config)

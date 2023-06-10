@@ -19,6 +19,7 @@ w_cook_time = 7
 w_category = 13
 w_difficulty = 4
 w_tags = 15
+w_title = 15
 
 
 def calc_count_vectorizer_model(all_recipes):
@@ -60,6 +61,7 @@ def _concatenate_features(df_row):
         ' '.join(str([df_row['cook_time']]) * w_cook_time) + ' ' + \
         ' '.join([df_row['category']] * w_category) + ' ' + \
         ' '.join([df_row['difficulty']] * w_difficulty) + ' ' + \
+        ' '.join([df_row['recipe_title']] * w_title) + ' ' + \
         ' '.join([df_row['tags']] * w_tags)
 
 
@@ -74,8 +76,18 @@ def _return_values(value):
 def _return_list_values(value):
     values = []
     if value is not None:
-        for item in value:
-            values.append(item.lower().replace(" ", ""))
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except ValueError:
+                value = value.split()
+
+        if isinstance(value, list):
+            for item in value:
+                if isinstance(item, str):
+                    words = item.split()
+                    for word in words:
+                        values.append(word.lower().replace(" ", ""))
 
     return ' '.join(values)
 
@@ -83,6 +95,7 @@ def _return_list_values(value):
 def _convert_values(df):
     df = df.copy()
     df['record_health'] = df.apply(lambda x: _return_values(x.record_health), axis=1)
+    df['recipe_title'] = df.apply(lambda x: _return_values(x.recipe_title), axis=1)
     df['cuisine'] = df.apply(lambda x: _return_values(x.cuisine), axis=1)
     df['course'] = df.apply(lambda x: _return_values(x.course), axis=1)
     df['diet'] = df.apply(lambda x: _return_values(x.diet), axis=1)
